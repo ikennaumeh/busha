@@ -20,6 +20,37 @@ void main() {
     });
     tearDown(() => locator.reset());
 
-    
+    BlockTransaction blockTransaction = BlockTransaction(hash: "hash", tx: [
+      Transaction(
+        hash: "hash",
+        size: 234,
+        blockHeight: 242,
+        time: 42323,
+      )
+    ]);
+
+    void arrangeSuccessResponseFromCryptoService() {
+      when(mockCryptoService.fetchBlockTransactions(blockHash: blockHash))
+          .thenAnswer((_) async => blockTransaction);
+    }
+
+    group("initial values", () {
+      test("test that transaction list is empty at the start", () {
+        expect(viewModel.blockTransaction, isNull);
+      });
+
+      test("test that viewModel is not busy at the start", () {
+        expect(viewModel.isBusy, false);
+      });
+    });
+
+    group("data fetched", () {
+      test("test that tezos list was fetched after the network call was done",
+          () async {
+        arrangeSuccessResponseFromCryptoService();
+        await viewModel.fetchTransactions();
+        expect(viewModel.blockTransaction, blockTransaction);
+      });
+    });
   });
 }
